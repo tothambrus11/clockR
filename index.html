@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <title>PuskApp</title>
+
+    <style>
+        body, html {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            background-color: #000000;
+            color: #fff;
+        }
+
+        .puska-kep {
+            width: 100%;
+            height: auto;
+        }
+
+        button {
+            background-color: #000000;
+            border: 2px solid white;
+            padding: 10px 20px;
+            margin: 5px 0;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        .input {
+            width: 100%;
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid white;
+            font: normal 16px/normal Arial, Helvetica, sans-serif;
+            color: white;
+            text-align: center;
+            -o-text-overflow: clip;
+            text-overflow: clip;
+            background: rgb(0, 0, 0);
+            -webkit-box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.2) inset;
+            box-shadow: 2px 2px 2px 0 rgba(0, 0, 0, 0.2) inset;
+        }
+
+        .input:focus {
+            color: rgba(255, 255, 255, 1);
+            background: rgba(0, 0, 0, 1);
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body id="body">
+<input type="text" class="input" name="url" placeholder="Puska ID" id="idInput">
+<button onclick="download()">FETCH IMAGES</button>
+<div id="content-list" style="height: 100vh">
+
+</div>
+<script>
+    var contentList;
+	var toggleVisibility = true;
+	
+    window.onload = function () {
+        // add eventListener for tizenhwkey
+        document.addEventListener('tizenhwkey', function (e) {
+            if (e.keyName === "menu") {
+                try {
+                    tizen.application.getCurrentApplication().exit();
+                } catch (ignore) {}
+            } else if (e.keyName === "back") {
+          		toggleVisibility = !toggleVisibility;
+            	if(toggleVisibility){
+            		document.getElementById('content-list').style.visibility="hidden";
+            	}
+            	else{
+         			document.getElementById('content-list').style.visibility="visible";
+            	}
+            }
+        });		
+    };
+   
+	window.addEventListener("touchstart",function(){
+		if(toggleVisibility){
+			document.getElementById('content-list').style.visibility="visible";
+			console.log("start");
+		}
+	});
+
+	window.addEventListener("touchend",function(){
+		if(toggleVisibility){
+			document.getElementById('content-list').style.visibility="hidden";
+			console.log("end");
+		}
+	});
+	
+	window.addEventListener("mousedown",function(){
+		if(toggleVisibility){
+			document.getElementById('content-list').style.visibility="visible";
+			console.log("start");
+		}
+	});
+
+	window.addEventListener("mouseup",function(){
+		if(toggleVisibility){
+			document.getElementById('content-list').style.visibility="hidden";
+			console.log("end");
+		}
+	});
+	
+    
+    function get(theUrl, callback, errorCallback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState === 4) {
+                if (xmlHttp.status === 200) {
+                    callback(xmlHttp.responseText);
+                } else {
+                    errorCallback();
+                }
+            }
+
+
+        };
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+
+    function download() {
+
+        get('https://ambrusweb11.hu/puskapp/getImageUrls.php?key=12345678&puskaID=' + document.getElementById('idInput').value,
+            function (response) {
+            	document.getElementById('idInput').value = "";
+                json = JSON.parse(response);
+
+                var html = "";
+                for (var i = 0; i < json.length; i++) {
+                    html += "<img class=\"puska-kep\" src=\"" + json[i].imageUrl + "\" />";
+                }
+
+                document.getElementById('content-list').innerHTML = html;
+            },
+            function () {
+                alert("Nincs net! Bluetooth-on oszthatsz mobilnetet.");
+            });
+    }
+</script>
+
+</body>
+</html>
